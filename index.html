@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+</head>
+
+<body>
+    <script>
+        Array.prototype.remove = function (from, to) {
+            let rest = this.slice((to || from) + 1 || this.length);
+            this.length = from < 0 ? this.length + from : from;
+            return this.push.apply(this, rest);
+        };
+        let user = new Array();
+        let superAdmin = new Array();
+        let casino = new Array();
+
+        function User(Name, Money) {
+            this.name = Name;
+            this.money = Money;
+            this.play = function (Money) {
+                if (casino.length == 1) {
+                    casino[0].gameMachines[0].play(Money)
+                }
+                else {
+                    casino[getRandomNumber(0, casino.length - 1)].gameMachines[0].play(Money)
+                }
+            }
+        }
+
+        function SuperAdmin(Name, Money) {
+            User.call(this, Name, Money);
+            this.createCasino = function (NameOfCasino) {
+                casino.push(new Casino(NameOfCasino))
+            }
+            this.createGameMachine = function (NameOfCasino, AmountOfMoney) {
+                getCasino(NameOfCasino).gameMachines.push(new GameMachine(AmountOfMoney))
+                getCasino(NameOfCasino).gameMachines.sort((a, b) => b.number - a.number)
+            }
+            this.addMoney = function (amountOfMoney) {
+                getCasino().getGameMachine().number += amountOfMoney
+            }
+            this.takeMoney = function (amountOfMoney) {
+                let tempMoney = amountOfMoney
+                let tempCasino = getCasino()
+                for (let i = 0; i < tempCasino.gameMachines.length; i++) {
+                    if (amountOfMoney != 0) {
+                        if (amountOfMoney > tempCasino.gameMachines[i].number) {
+                            this.money += tempCasino.gameMachines[i].number
+                            amountOfMoney -= tempCasino.gameMachines[i].number
+                            tempCasino.gameMachines[i].number = 0
+                        }
+                        else {
+                            this.money += amountOfMoney
+                            tempCasino.gameMachines[i].number -= amountOfMoney
+                            amountOfMoney = 0
+                        }
+                    }
+                }
+                tempCasino.gameMachines.sort((a, b) => b.number - a.number)
+            }
+            this.deleteGameMachine = function (Number) {
+                let temp = getCasino()
+                if (temp.gameMachines.length >= Number) {
+                    let tempMoney = temp.gameMachines[Number - 1].number
+                    temp.gameMachines.remove(Number - 1)
+                    tempMoney = tempMoney / temp.gameMachines.length
+                    temp.gameMachines.forEach(x => x.number += tempMoney)
+                }
+                else {
+                    console.log("GameMachine doesn't exist")
+                }
+            }
+        }
+
+        function Casino(Name) {
+            this.name = Name;
+            this.gameMachines = new Array()
+            this.getMoney = function () {
+                let sum = 0
+                this.gameMachines.forEach(x => sum += x.number)
+                return sum
+            }
+            this.getMachineCount = function () {
+                return this.gameMachines.length
+            }
+            this.getGameMachine = function (NumOfGameMachine) {
+                let str = "Enter the number of GameMachine"
+                if (NumOfGameMachine == undefined) {
+                    if (this.gameMachines.length > 0) {
+                        for (let i = 0; i < this.gameMachines.length; i++) {
+                            str += `\nGameMachine №${i +1}`
+                        }
+                        return this.gameMachines[prompt(str)]
+                    }
+                }
+            }
+        }
+
+        function GameMachine(Number = 1000) {
+            this.number = Number
+            this.getMoney = function () {
+                return this.number
+            }
+            this.takeMoney = function (Number) {
+                if (this.number > Number) {
+                    this.number -= Number
+                }
+                else {
+                    console.log('Not enough money')
+                }
+            }
+            this.putMoney = function (Number) {
+                this.number += Number
+            }
+            this.play = function (Number = 0) {
+                this.number += Number
+                let randomNumber = getRandomNumber(100, 999)
+                console.log(randomNumber)
+                let a = randomNumber % 10
+                randomNumber = parseInt(randomNumber / 10)
+                let b = randomNumber % 10
+                randomNumber = parseInt(randomNumber / 10)
+                let c = randomNumber % 10
+                randomNumber = parseInt(randomNumber / 10)
+                console.log(a, b, c)
+                console.log(this.number)
+                if (a == b || b == c) {
+                    if (a == c) {
+                        this.number -= Number * 3
+                        console.log(this.number)
+                        return Number * 3
+                    }
+                    this.number -= Number * 2
+                    console.log(this.number)
+                    return Number * 2
+                }
+                console.log(this.number)
+                return "You lost"
+            }
+        }
+
+        function getCasino(NameOfCasino) {
+            let str = "Enter the name of casino:"
+            if (NameOfCasino == undefined) {
+                if (casino.length > 0) {
+                    for (let i = 0; i < casino.length; i++) {
+                        str += `\n ${casino[i].name}`
+                    }
+                }
+                return casino.find(x => x.name = prompt(str))
+            }
+            return casino.find(x => x.name = NameOfCasino)
+        }
+
+        function getRandomNumber(min, max) {
+            return parseInt((Math.random() * (max - min + 1)) + min)
+        }
+    </script>
+</body>
+
+</html>
